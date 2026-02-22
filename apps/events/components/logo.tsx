@@ -11,13 +11,7 @@ export function LogoIcon({ className }: LogoIconProps): React.ReactElement {
       xmlns="http://www.w3.org/2000/svg"
       className={cn('h-7 w-7', className)}
     >
-      <defs>
-        <linearGradient id="evt-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#059669" />
-          <stop offset="100%" stopColor="#0d9488" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="8" fill="url(#evt-logo-gradient)" />
+      <rect width="32" height="32" rx="8" fill="#10b981" />
       {/* Calendar icon */}
       <rect x="7" y="10" width="18" height="15" rx="2" stroke="white" strokeWidth="2" fill="none" />
       <line x1="7" y1="15" x2="25" y2="15" stroke="white" strokeWidth="2" />

@@ -11,13 +11,7 @@ export function LogoIcon({ className }: LogoIconProps): React.ReactElement {
       xmlns="http://www.w3.org/2000/svg"
       className={cn('h-7 w-7', className)}
     >
-      <defs>
-        <linearGradient id="logo-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#6366f1" />
-          <stop offset="100%" stopColor="#8b5cf6" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="8" fill="url(#logo-gradient)" />
+      <rect width="32" height="32" rx="8" fill="#6366f1" />
       <polyline
         points="8,22 13,16 17,19 24,10"
         stroke="white"

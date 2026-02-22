@@ -40,12 +40,10 @@ Thumbs.db
 # prisma
 *.db
 *.db-journal
-prisma/generated/
+**/prisma/generated/
 
 # vercel
 .vercel
 
 # claude
 .claude/
-
-.vercel

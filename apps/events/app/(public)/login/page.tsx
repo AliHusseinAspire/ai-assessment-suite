@@ -1,11 +1,15 @@
 import { Logo } from '@/components/logo';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { LoginForm } from './login-form';
 
 export default function LoginPage(): React.ReactElement {
   return (
     <div className="flex min-h-screen">
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       {/* Left gradient panel — desktop only */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-primary via-teal-600 to-teal-400 lg:flex lg:flex-col lg:items-center lg:justify-center">
+      <div className="relative hidden w-1/2 overflow-hidden bg-gradient-to-br from-primary via-teal-600 to-teal-400 dark:from-emerald-950 dark:via-teal-950 dark:to-emerald-900 lg:flex lg:flex-col lg:items-center lg:justify-center">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-white/10" />
           <div className="absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-white/10" />
@@ -22,7 +26,7 @@ export default function LoginPage(): React.ReactElement {
       {/* Right form panel */}
       <div className="flex flex-1 flex-col items-center justify-center px-4">
         {/* Mobile gradient banner */}
-        <div className="mb-8 w-full max-w-md rounded-2xl bg-gradient-to-r from-primary to-teal-400 p-6 text-center text-white lg:hidden">
+        <div className="mb-8 w-full max-w-md rounded-2xl bg-gradient-to-r from-primary to-teal-400 dark:from-emerald-950 dark:to-teal-950 p-6 text-center text-white lg:hidden">
           <Logo iconClassName="h-10 w-10 mx-auto" className="justify-center text-3xl" />
           <p className="mt-2 text-sm text-white/80">Sign in to manage your events</p>
         </div>
