@@ -24,7 +24,7 @@ A full-stack event scheduling platform built with Next.js 15, featuring AI-power
 
 | View | Description |
 |------|-------------|
-| Dashboard | KPI cards, RSVP pie chart, upcoming events, activity feed |
+| Dashboard | KPI cards, RSVP stacked bar chart, upcoming events, activity feed |
 | Events List | Searchable table with status filters and AI search toggle |
 | Event Detail | Full event info, RSVP buttons, attendee list, activity timeline |
 | Create Event | Form with AI quick create, description generator, conflict detection |
@@ -42,7 +42,7 @@ A full-stack event scheduling platform built with Next.js 15, featuring AI-power
 | ORM | Prisma | Type-safe queries, schema-as-code |
 | Auth | Supabase Auth (@supabase/ssr) | Cookie-based sessions, SSR-compatible |
 | AI | Groq (llama-3.3-70b-versatile) | Fast inference for all AI features |
-| Charts | Recharts | RSVP distribution pie chart |
+| Charts | Custom CSS + Recharts | RSVP stacked bar, data visualizations |
 | Calendar | date-fns | Date math for calendar grid computation |
 | Validation | Zod | Runtime schema validation at API boundaries |
 | Notifications | Sonner | Toast notifications |
