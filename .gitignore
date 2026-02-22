@@ -47,3 +47,5 @@ prisma/generated/
 
 # claude
 .claude/
+
+.vercel

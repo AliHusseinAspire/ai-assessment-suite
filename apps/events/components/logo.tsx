@@ -13,8 +13,8 @@ export function LogoIcon({ className }: LogoIconProps): React.ReactElement {
     >
       <defs>
         <linearGradient id="evt-logo-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="100%" stopColor="#14b8a6" />
+          <stop offset="0%" stopColor="#059669" />
+          <stop offset="100%" stopColor="#0d9488" />
         </linearGradient>
       </defs>
       <rect width="32" height="32" rx="8" fill="url(#evt-logo-gradient)" />
