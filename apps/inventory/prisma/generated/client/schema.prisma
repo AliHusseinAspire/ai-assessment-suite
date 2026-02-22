@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+enum ItemStatus {
+  IN_STOCK
+  LOW_STOCK
+  ORDERED
+  DISCONTINUED
+}
+
+model User {
+  id         String     @id @default(cuid())
+  email      String     @unique
+  name       String
+  role       Role       @default(VIEWER)
+  supabaseId String     @unique @map("supabase_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  activities Activity[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  description String?
+  color       String          @default("#6366f1")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+  items       InventoryItem[]
+
+  @@map("categories")
+}
+
+model InventoryItem {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  sku         String     @unique
+  quantity    Int        @default(0)
+  price       Float      @default(0)
+  status      ItemStatus @default(IN_STOCK)
+  supplier    String?
+  minStock    Int        @default(10) @map("min_stock")
+  maxStock    Int        @default(100) @map("max_stock")
+  imageUrl    String?    @map("image_url")
+  metadata    Json?
+  categoryId  String     @map("category_id")
+  category    Category   @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  activities  Activity[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([sku])
+  @@index([name])
+  @@map("inventory_items")
+}
+
+model Activity {
+  id        String         @id @default(cuid())
+  action    String
+  details   Json?
+  userId    String         @map("user_id")
+  user      User           @relation(fields: [userId], references: [id])
+  itemId    String?        @map("item_id")
+  item      InventoryItem? @relation(fields: [itemId], references: [id], onDelete: SetNull)
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([itemId])
+  @@index([createdAt])
+  @@map("activities")
+}

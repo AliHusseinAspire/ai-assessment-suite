@@ -1,4 +1,4 @@
-import type { ItemStatus } from '@prisma/client';
+import type { ItemStatus } from '@/prisma/generated/client';
 import { cn } from '@assessment/ui/lib/utils';
 import { ITEM_STATUSES } from '@/features/inventory/constants';
 

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { X, LayoutDashboard, Package, FolderOpen, Users, Settings } from 'lucide-react';
 import { cn } from '@assessment/ui/lib/utils';
 import { Logo } from '@/components/logo';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/prisma/generated/client';
 import { hasPermission } from '@/lib/auth/permissions';
 import { useEffect } from 'react';
 

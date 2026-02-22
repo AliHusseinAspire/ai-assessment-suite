@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react';
 import { createCategory } from '@/features/categories/actions';
 import { toast } from 'sonner';
 import type { ActionResult } from '@/features/auth/types';
-import type { Category } from '@prisma/client';
+import type { Category } from '@/prisma/generated/client';
 
 export function CategoryForm(): React.ReactElement {
   const [color, setColor] = useState('#6366f1');

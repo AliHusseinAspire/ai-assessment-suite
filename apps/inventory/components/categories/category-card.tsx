@@ -6,7 +6,7 @@ import { deleteCategory } from '@/features/categories/actions';
 import { toast } from 'sonner';
 import { useTransition } from 'react';
 import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog';
-import type { Category } from '@prisma/client';
+import type { Category } from '@/prisma/generated/client';
 
 interface CategoryCardProps {
   category: Category;

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/prisma/generated/client';
 import { getCurrentUser } from '@/features/auth/actions';
 
 export async function requireAuth() {

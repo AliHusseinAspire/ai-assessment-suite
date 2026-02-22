@@ -7,7 +7,7 @@ import { useState, useTransition } from 'react';
 import { deleteItem } from '@/features/inventory/actions';
 import { toast } from 'sonner';
 import { ConfirmDialog, useConfirmDialog } from '@/components/ui/confirm-dialog';
-import type { InventoryItem, Category } from '@prisma/client';
+import type { InventoryItem, Category } from '@/prisma/generated/client';
 
 interface InventoryTableProps {
   items: (InventoryItem & { category: Category })[];

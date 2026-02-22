@@ -5,7 +5,14 @@ import { updateUserRole } from '@/features/users/actions';
 import { toast } from 'sonner';
 import { RoleBadge } from '@/components/role-badge';
 import { formatDistanceToNow } from 'date-fns';
-import type { User } from '@prisma/client';
+import type { User } from '@/prisma/generated/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@assessment/ui/components/select';
 
 
 interface UserTableProps {
@@ -23,7 +30,7 @@ export function UserTable({ users, currentUserId }: UserTableProps): React.React
             <th className="px-4 py-3 text-left font-medium">Role</th>
             <th className="px-4 py-3 text-right font-medium">Activities</th>
             <th className="px-4 py-3 text-left font-medium">Joined</th>
-            <th className="px-4 py-3 text-right font-medium">Actions</th>
+            <th className="px-4 py-3 text-left font-medium">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y">
@@ -90,20 +97,24 @@ function UserRow({
       <td className="px-4 py-3 text-muted-foreground">
         {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
       </td>
-      <td className="px-4 py-3 text-right">
+      <td className="px-4 py-3">
         {isCurrentUser ? (
           <span className="text-xs text-muted-foreground">-</span>
         ) : (
-          <select
+          <Select
             value={user.role}
-            onChange={(e) => handleRoleChange(e.target.value)}
+            onValueChange={handleRoleChange}
             disabled={isPending}
-            className="h-8 rounded-md border bg-background px-2 text-xs disabled:opacity-50"
           >
-            <option value="ADMIN">Admin</option>
-            <option value="MANAGER">Manager</option>
-            <option value="VIEWER">Viewer</option>
-          </select>
+            <SelectTrigger className="h-8 w-[120px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ADMIN">Admin</SelectItem>
+              <SelectItem value="MANAGER">Manager</SelectItem>
+              <SelectItem value="VIEWER">Viewer</SelectItem>
+            </SelectContent>
+          </Select>
         )}
       </td>
     </tr>

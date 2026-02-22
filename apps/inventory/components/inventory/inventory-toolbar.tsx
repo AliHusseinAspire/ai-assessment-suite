@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
-import { Search, SlidersHorizontal, Plus, X, Sparkles } from 'lucide-react';
+import { Search, Plus, X, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import type { ItemStatus } from '@prisma/client';
+import type { ItemStatus } from '@/prisma/generated/client';
 import { cn } from '@assessment/ui/lib/utils';
 import {
   Select,
@@ -29,7 +29,6 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [showFilters, setShowFilters] = useState(false);
   const [aiMode, setAiMode] = useState(false);
   const [searchText, setSearchText] = useState(searchParams.get('search') ?? '');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -85,7 +84,6 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
         });
 
         if (!res.ok) {
-          // Fallback to text search
           handleTextSearch(query);
           return;
         }
@@ -111,7 +109,6 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
     (value: string) => {
       setSearchText(value);
       if (!aiMode) {
-        // Debounced text search
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => handleTextSearch(value), 300);
       }
@@ -123,7 +120,6 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
-      // Cancel any pending debounce
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (aiMode) {
         startTransition(() => {
@@ -142,6 +138,8 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
     handleTextSearch('');
   }, [handleTextSearch]);
 
+  const hasFilters = currentCategory || currentStatus || currentSort;
+
   const clearAll = useCallback(() => {
     setSearchText('');
     setAiMode(false);
@@ -151,18 +149,12 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
     });
   }, [router]);
 
-  const hasFilters = currentCategory || currentStatus || currentSort;
-
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Unified Search */}
-        <div
-          className={cn(
-            'relative flex-1 max-w-md',
-          )}
-        >
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="space-y-3">
+      {/* Top row: search + add button */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={searchText}
@@ -171,136 +163,116 @@ export function InventoryToolbar({ categories, canCreate }: InventoryToolbarProp
             placeholder={
               aiMode
                 ? "Try: 'show me low stock electronics' then press Enter"
-                : 'Search items...'
+                : 'Search items by name, SKU, or description...'
             }
             className={cn(
-              'flex h-10 w-full rounded-md border bg-background pl-10 pr-20 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              'flex h-11 w-full rounded-lg border bg-background pl-10 pr-20 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
               aiMode ? 'border-primary/50' : 'border-input'
             )}
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
             {isPending && (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             )}
             {searchText && (
               <button
                 onClick={clearSearch}
-                className="rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
+                className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
                 aria-label="Clear search"
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             )}
             <button
               onClick={() => setAiMode(!aiMode)}
               className={cn(
-                'rounded-sm p-0.5 transition-colors',
+                'rounded-md p-1 transition-colors',
                 aiMode
-                  ? 'text-primary hover:text-primary/80'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               )}
               aria-label={aiMode ? 'Disable AI search' : 'Enable AI search'}
-              title={aiMode ? 'AI search on' : 'AI search off'}
+              title={aiMode ? 'AI search on — type naturally and press Enter' : 'Enable AI search'}
             >
               <Sparkles className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              'inline-flex h-10 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors hover:bg-accent',
-              hasFilters && 'border-primary text-primary'
-            )}
+        {canCreate && (
+          <Link
+            href="/inventory/new"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters
-            {hasFilters && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                {[currentCategory, currentStatus, currentSort].filter(Boolean).length}
-              </span>
-            )}
-          </button>
-
-          {canCreate && (
-            <Link
-              href="/inventory/new"
-              className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              Add Item
-            </Link>
-          )}
-        </div>
+            <Plus className="h-4 w-4" />
+            Add Item
+          </Link>
+        )}
       </div>
 
-      {/* Filter bar */}
-      {showFilters && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/50 p-3">
-          <Select
-            value={currentCategory || 'all'}
-            onValueChange={(v: string) => updateParams({ category: v === 'all' ? '' : v })}
-          >
-            <SelectTrigger className="h-9 w-[160px]">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Filter row: always visible */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Select
+          value={currentCategory || 'all'}
+          onValueChange={(v: string) => updateParams({ category: v === 'all' ? '' : v })}
+        >
+          <SelectTrigger className="h-9 w-[150px] rounded-lg text-xs">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          <Select
-            value={currentStatus || 'all'}
-            onValueChange={(v: string) => updateParams({ status: v === 'all' ? '' : v })}
-          >
-            <SelectTrigger className="h-9 w-[160px]">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              {ITEM_STATUSES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <Select
+          value={currentStatus || 'all'}
+          onValueChange={(v: string) => updateParams({ status: v === 'all' ? '' : v })}
+        >
+          <SelectTrigger className="h-9 w-[150px] rounded-lg text-xs">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {ITEM_STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          <Select
-            value={currentSort || 'all'}
-            onValueChange={(v: string) => updateParams({ sort: v === 'all' ? '' : v })}
-          >
-            <SelectTrigger className="h-9 w-[160px]">
-              <SelectValue placeholder="Default Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Default Sort</SelectItem>
-              {SORT_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <Select
+          value={currentSort || 'all'}
+          onValueChange={(v: string) => updateParams({ sort: v === 'all' ? '' : v })}
+        >
+          <SelectTrigger className="h-9 w-[150px] rounded-lg text-xs">
+            <SelectValue placeholder="Default Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Default Sort</SelectItem>
+            {SORT_OPTIONS.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-          {(hasFilters || searchText) && (
-            <button
-              onClick={clearAll}
-              className="inline-flex h-9 items-center gap-1 rounded-md px-3 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-              Clear all
-            </button>
-          )}
-        </div>
-      )}
+        {(hasFilters || searchText) && (
+          <button
+            onClick={clearAll}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear all
+          </button>
+        )}
+      </div>
     </div>
   );
 }

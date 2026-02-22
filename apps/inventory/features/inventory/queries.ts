@@ -1,5 +1,5 @@
 import { prisma, withRetry } from '@/lib/prisma';
-import type { ItemStatus, Prisma } from '@prisma/client';
+import type { ItemStatus, Prisma } from '@/prisma/generated/client';
 import { PAGE_SIZE } from './constants';
 
 interface GetItemsParams {

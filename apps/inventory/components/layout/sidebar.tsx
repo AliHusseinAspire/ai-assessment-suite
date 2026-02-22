@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@assessment/ui/lib/utils';
 import { Logo, LogoIcon } from '@/components/logo';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/prisma/generated/client';
 import { hasPermission } from '@/lib/auth/permissions';
 
 interface NavItem {

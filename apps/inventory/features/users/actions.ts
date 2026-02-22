@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/features/auth/actions';
 import { requirePermission } from '@/lib/auth/permissions';
 import type { ActionResult } from '@/features/auth/types';
-import type { Role } from '@prisma/client';
+import type { Role } from '@/prisma/generated/client';
 
 export async function updateUserRole(
   userId: string,

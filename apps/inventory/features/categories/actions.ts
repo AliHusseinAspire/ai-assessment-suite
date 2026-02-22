@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/features/auth/actions';
 import { requirePermission } from '@/lib/auth/permissions';
 import { createCategorySchema, updateCategorySchema } from './schemas';
 import type { ActionResult } from '@/features/auth/types';
-import type { Category } from '@prisma/client';
+import type { Category } from '@/prisma/generated/client';
 
 export async function createCategory(
   formData: FormData

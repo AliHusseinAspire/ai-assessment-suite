@@ -1,4 +1,4 @@
-import type { ItemStatus } from '@prisma/client';
+import type { ItemStatus } from '@/prisma/generated/client';
 
 export const ITEM_STATUSES: { value: ItemStatus; label: string; color: string }[] = [
   { value: 'IN_STOCK', label: 'In Stock', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },

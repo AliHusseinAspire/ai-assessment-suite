@@ -1,4 +1,4 @@
-import type { Role } from '@prisma/client';
+import type { Role } from '@/prisma/generated/client';
 
 export type Permission =
   | 'items:read'

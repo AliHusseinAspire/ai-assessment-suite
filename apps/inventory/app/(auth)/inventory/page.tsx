@@ -5,7 +5,7 @@ import { hasPermission } from '@/lib/auth/permissions';
 import { InventoryToolbar } from '@/components/inventory/inventory-toolbar';
 import { InventoryTable } from '@/components/inventory/inventory-table';
 import { InventoryPagination } from '@/components/inventory/inventory-pagination';
-import type { ItemStatus } from '@prisma/client';
+import type { ItemStatus } from '@/prisma/generated/client';
 
 interface InventoryPageProps {
   searchParams: Promise<{

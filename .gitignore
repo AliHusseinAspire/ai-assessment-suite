@@ -40,6 +40,7 @@ Thumbs.db
 # prisma
 *.db
 *.db-journal
+prisma/generated/
 
 # vercel
 .vercel

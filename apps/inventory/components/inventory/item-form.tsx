@@ -5,10 +5,18 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createItem, updateItem } from '@/features/inventory/actions';
 import { ITEM_STATUSES } from '@/features/inventory/constants';
-import type { InventoryItem, Category } from '@prisma/client';
+import type { InventoryItem, Category } from '@/prisma/generated/client';
 import type { ActionResult } from '@/features/auth/types';
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@assessment/ui/components/select';
 
 interface ItemFormProps {
   item?: InventoryItem | null;
@@ -22,6 +30,16 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
   const [suggestedCategory, setSuggestedCategory] = useState<string | null>(null);
   const [generatedDescription, setGeneratedDescription] = useState<string | null>(null);
 
+  // Track required fields for validation
+  const [name, setName] = useState(item?.name ?? '');
+  const [sku, setSku] = useState(item?.sku ?? '');
+  const [categoryId, setCategoryId] = useState(suggestedCategory ?? item?.categoryId ?? '');
+  const [quantity, setQuantity] = useState(item?.quantity?.toString() ?? '0');
+  const [price, setPrice] = useState(item?.price?.toString() ?? '0');
+
+  const canSubmit = name.trim() !== '' && sku.trim() !== '' && categoryId !== '' && quantity !== '' && price !== '';
+  const hasName = name.trim() !== '';
+
   const [state, formAction, isPending] = useActionState<ActionResult<InventoryItem> | null, FormData>(
     async (_prevState, formData) => {
       const result = isEdit ? await updateItem(formData) : await createItem(formData);
@@ -34,18 +52,19 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
     null
   );
 
-  const handleAICategorize = async (name: string) => {
-    if (!name.trim()) return;
+  const handleAICategorize = async (nameValue: string) => {
+    if (!nameValue.trim()) return;
     setAiLoading('categorize');
     try {
       const res = await fetch('/api/ai/categorize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: nameValue }),
       });
       if (res.ok) {
         const data = await res.json();
         setSuggestedCategory(data.categoryId);
+        setCategoryId(data.categoryId);
       }
     } catch {
       // AI feature is non-blocking
@@ -54,14 +73,14 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
     }
   };
 
-  const handleAIDescribe = async (name: string) => {
-    if (!name.trim()) return;
+  const handleAIDescribe = async (nameValue: string) => {
+    if (!nameValue.trim()) return;
     setAiLoading('describe');
     try {
       const res = await fetch('/api/ai/describe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: nameValue }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -95,7 +114,8 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
             name="name"
             type="text"
             required
-            defaultValue={item?.name}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             onBlur={(e) => {
               if (!isEdit) handleAICategorize(e.target.value);
             }}
@@ -112,12 +132,9 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
             </label>
             <button
               type="button"
-              onClick={() => {
-                const nameInput = document.getElementById('name') as HTMLInputElement;
-                if (nameInput?.value) handleAIDescribe(nameInput.value);
-              }}
-              disabled={aiLoading === 'describe'}
-              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10 disabled:opacity-50"
+              onClick={() => handleAIDescribe(name)}
+              disabled={!hasName || aiLoading === 'describe'}
+              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10 disabled:opacity-50 disabled:pointer-events-none"
             >
               <Sparkles className="h-3 w-3" />
               {aiLoading === 'describe' ? 'Generating...' : 'Generate with AI'}
@@ -136,15 +153,22 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
 
         {/* SKU */}
         <div className="space-y-2">
-          <label htmlFor="sku" className="text-sm font-medium">
-            SKU <span className="text-destructive">*</span>
-          </label>
+          <div className="flex items-center gap-1.5">
+            <label htmlFor="sku" className="text-sm font-medium">
+              SKU <span className="text-destructive">*</span>
+            </label>
+            <InfoTooltip
+              label="What is SKU?"
+              text="Stock Keeping Unit — a unique code to identify and track each product in your inventory (e.g., ELEC-001, FUR-042)."
+            />
+          </div>
           <input
             id="sku"
             name="sku"
             type="text"
             required
-            defaultValue={item?.sku}
+            value={sku}
+            onChange={(e) => setSku(e.target.value)}
             placeholder="e.g., ELEC-001"
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
@@ -155,21 +179,24 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
           <label htmlFor="categoryId" className="text-sm font-medium">
             Category <span className="text-destructive">*</span>
           </label>
-          <select
-            id="categoryId"
+          <Select
             name="categoryId"
             required
-            defaultValue={suggestedCategory ?? item?.categoryId ?? ''}
+            value={categoryId}
+            onValueChange={(v) => setCategoryId(v)}
             key={suggestedCategory ?? 'default'}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="categoryId" className="h-10 w-full">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {suggestedCategory && aiLoading !== 'categorize' && (
             <p className="text-xs text-primary">
               <Sparkles className="inline h-3 w-3 mr-1" />
@@ -192,7 +219,8 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
             type="number"
             required
             min="0"
-            defaultValue={item?.quantity ?? 0}
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
@@ -209,7 +237,8 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
             required
             min="0"
             step="0.01"
-            defaultValue={item?.price ?? 0}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
@@ -219,18 +248,21 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
           <label htmlFor="status" className="text-sm font-medium">
             Status
           </label>
-          <select
-            id="status"
+          <Select
             name="status"
             defaultValue={item?.status ?? 'IN_STOCK'}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            {ITEM_STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="status" className="h-10 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ITEM_STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Supplier */}
@@ -283,8 +315,8 @@ export function ItemForm({ item, categories }: ItemFormProps): React.ReactElemen
       <div className="flex gap-3">
         <button
           type="submit"
-          disabled={isPending}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          disabled={isPending || !canSubmit}
+          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:pointer-events-none"
         >
           {isPending ? 'Saving...' : isEdit ? 'Update Item' : 'Create Item'}
         </button>

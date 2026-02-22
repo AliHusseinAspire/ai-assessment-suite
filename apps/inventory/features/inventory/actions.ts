@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/features/auth/actions';
 import { requirePermission } from '@/lib/auth/permissions';
 import { createItemSchema, updateItemSchema } from './schemas';
 import type { ActionResult } from '@/features/auth/types';
-import type { InventoryItem } from '@prisma/client';
+import type { InventoryItem } from '@/prisma/generated/client';
 
 async function logActivity(
   userId: string,

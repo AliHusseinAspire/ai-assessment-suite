@@ -40,10 +40,11 @@ export function CategoryPieChart({ data }: CategoryPieChartProps): React.ReactEl
                 outerRadius={100}
                 dataKey="value"
                 nameKey="name"
-                paddingAngle={2}
+                paddingAngle={0}
+                strokeWidth={0}
               >
                 {filteredData.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
+                  <Cell key={index} fill={entry.color} stroke="none" />
                 ))}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
